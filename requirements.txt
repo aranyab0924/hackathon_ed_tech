@@ -1,0 +1,2 @@
+# No Python packages required for this static site
+# requirements.txt intentionally left minimal

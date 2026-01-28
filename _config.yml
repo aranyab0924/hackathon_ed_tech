@@ -1,0 +1,7 @@
+title: Bare-bones Site
+
+# Keep things minimal; no plugins
+plugins: []
+
+# Do not use future-dated posts
+future: false

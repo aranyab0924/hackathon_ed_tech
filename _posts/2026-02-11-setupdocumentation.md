@@ -1,3 +1,9 @@
+---
+layout: post
+title:  "Setup Documentation"
+date:   2026-02-11
+---
+
 # Setup and Developer Guide
 
 This repository is a Jekyll-based site. This document explains the project setup process that we used and lists the dependencies and tools.

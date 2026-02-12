@@ -15,8 +15,10 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./
-
   deploy:
+    permissions:
+      id-token: write
+      contents: read
     runs-on: ubuntu-latest
     needs: build-and-deploy
     steps:

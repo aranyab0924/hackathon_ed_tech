@@ -33,6 +33,8 @@ header_pages:
     url: "/submission"
   - title: Docs
     url: "/documentation"
+  - title: Stats Page
+    url: "/statspage"
 
 # Build settings
 # theme: minima

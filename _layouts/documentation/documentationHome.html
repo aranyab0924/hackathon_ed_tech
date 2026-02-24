@@ -3,6 +3,32 @@ layout: default
 ---
 
 <div class="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 pt-8">
+  <!-- Notebooks listing (static .ipynb files and any posts flagged as notebooks) -->
+  <div class="mb-8">
+    <h2 class="text-2xl font-semibold text-slate-100 mb-3">Notebooks</h2>
+    {% assign nb_static = site.static_files | where_exp: "f", "f.extname == '.ipynb'" %}
+    {% assign nb_posts = site.posts | where_exp: "p", "p.path contains '.ipynb' or p.notebook == true" %}
+
+    {% if nb_static.size > 0 or nb_posts.size > 0 %}
+      <ul class="space-y-2">
+        {% for p in nb_posts %}
+          <li>
+            <a href="{{ p.url | relative_url }}" class="text-indigo-400 hover:underline">{{ p.title }}</a>
+            <small class="text-slate-400"> — post</small>
+          </li>
+        {% endfor %}
+        {% for f in nb_static %}
+          <li>
+            <a href="{{ f.path | relative_url }}" class="text-indigo-400 hover:underline">{{ f.path | split: '/' | last }}</a>
+            <small class="text-slate-400"> — file</small>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="text-slate-300">No notebooks found. Add .ipynb files (e.g., in a <code>notebooks/</code> folder) or mark posts with <code>notebook: true</code> in front matter.</p>
+    {% endif %}
+  </div>
+
   <div class="grid gap-6">
     {% for page in site.posts %}
     <div

@@ -32,7 +32,7 @@ header_pages:
   - title: Submit
     url: "/submission"
   - title: Docs
-    url: "/documentation"
+    url: "/documentation/"
   - title: Stats Page
     url: "/statspage"
 

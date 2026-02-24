@@ -26,9 +26,9 @@ layout: default
 <div id="statspage-root">
 
 <!-- Page heading -->
-<div class="mb-8 border-b border-gray-700 pb-5">
-  <h1 class="text-xl font-medium text-gray-100 tracking-tight">Skills Overview</h1>
-  <p class="text-gray-500 text-sm font-light mt-1">Proficiency based on assignment & lesson completion</p>
+<div class="mb-8 border-b border-slate-700 pb-5">
+  <h1 class="text-xl font-medium text-slate-100 tracking-tight">Skills Overview</h1>
+  <p class="text-slate-500 text-sm font-light mt-1">Proficiency based on assignment & lesson completion</p>
 </div>
 
 <!-- Radar -->
@@ -164,7 +164,7 @@ function drawRadar(data) {
       x: CX + (R + 40) * Math.cos(a),
       y: CY + (R + 40) * Math.sin(a),
     };
-    const fo = svgEl('foreignObject');
+  const fo = svgEl('foreignObject');
     fo.setAttribute('x', p.x - 66);
     fo.setAttribute('y', p.y - 22);
     fo.setAttribute('width', '132');
@@ -186,13 +186,13 @@ function drawRadar(data) {
   labels.forEach((lbl, i) => {
     const pct = Math.round(values[i] * 100);
     const div = document.createElement('div');
-    div.className = 'flex flex-col gap-2 py-3 border-b border-gray-700';
+    div.className = 'flex flex-col gap-2 py-3 border-b border-slate-700';
     div.innerHTML = `
       <div class="flex items-center justify-between">
-        <span class="text-gray-400 text-sm font-light">${lbl}</span>
+        <span class="text-slate-400 text-sm font-light">${lbl}</span>
         <span class="text-sm font-medium tabular-nums" style="color:#a8d8ea">${pct}</span>
       </div>
-      <div class="h-0.5 w-full rounded-full bg-gray-700 overflow-hidden">
+      <div class="h-0.5 w-full rounded-full bg-slate-700 overflow-hidden">
         <div class="h-full rounded-full"
              style="width:${pct}%;background:linear-gradient(to right,#4aadbe,#62c6b0)">
         </div>

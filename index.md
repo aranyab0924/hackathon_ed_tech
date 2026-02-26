@@ -24,6 +24,9 @@ layout: default
         <a href="{{ '/discover' | relative_url }}" class="inline-flex items-center bg-white/10 text-indigo-100 font-medium py-2 px-4 rounded-lg hover:bg-white/20 transition">
           Learn more
         </a>
+        <a href="{{ '/calendar' | relative_url }}" class="inline-flex items-center bg-slate-100 text-slate-800 font-medium py-2 px-4 rounded-lg hover:bg-slate-200 transition">
+          Open Planner
+        </a>
       </div>
     </div>
   </header>

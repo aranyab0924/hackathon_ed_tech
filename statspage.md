@@ -31,6 +31,12 @@ layout: default
   <p class="text-slate-500 text-sm font-light mt-1">Proficiency based on assignment & lesson completion</p>
 </div>
 
+<div class="mb-6 p-4 bg-slate-800 rounded-md ring-1 ring-black/20">
+  <h2 class="text-lg font-semibold text-slate-100 mb-2">Quick Skills Quiz</h2>
+  <p class="text-sm text-slate-300 mb-3">Take the extended quiz on a separate page to compute your Coding, Agile and Creativity scores for this radar.</p>
+  <a href="{{ '/skills_quiz' | relative_url }}" class="inline-block mt-2 px-3 py-2 bg-indigo-600 rounded text-white">Open full quiz</a>
+</div>
+
 <!-- Radar -->
 <div class="flex justify-center">
   <svg id="radar-svg" viewBox="0 0 520 520" width="100%" style="max-width:460px"
@@ -67,15 +73,11 @@ layout: default
 <script>
 // ─────────────────────────────────────────────────────────
 //  SKILLS DATA
-//  To connect to a backend replace this object with:
-//
-//    const res = await fetch('/api/skills');
-//    const SKILLS_DATA = await res.json();
-//    drawRadar(SKILLS_DATA);
-//
-//  Expected shape: { "Skill Name": 0.0–1.0, ... }
+//  This radar will read values from a simple localStorage quiz (key: 'personal_skills_quiz')
+//  If not present, it will fall back to default example data.
+//  Expected shape for quiz result: { coding: 0..1, agile: 0..1, creativity: 0..1 }
 // ─────────────────────────────────────────────────────────
-const SKILLS_DATA = {
+const DEFAULT_SKILLS = {
   "Git Management":          0.82,
   "Python APIs":             0.75,
   "Java OOP":                0.61,
@@ -83,6 +85,31 @@ const SKILLS_DATA = {
   "Documentation/Planning":  0.70,
   "Soft Skills":             0.91,
 };
+
+function loadQuizNormalized(){
+  try{
+    const raw = JSON.parse(localStorage.getItem('personal_skills_quiz'));
+    if(!raw) return null;
+    // raw should have coding/agile/creativity in 0..1
+    return raw;
+  }catch(e){ return null; }
+}
+
+function buildSkillsFromQuiz(quiz){
+  if(!quiz) return null;
+  // Map our three dimensions into the radar skills as a rough heuristic
+  // coding -> influences Python APIs, Java OOP
+  // agile -> influences Documentation/Planning, Soft Skills
+  // creativity -> influences Git Management and SQL (just for illustrative mapping)
+  return {
+    "Git Management": Math.min(1, 0.2 + quiz.creativity * 0.8),
+    "Python APIs":    Math.min(1, 0.15 + quiz.coding * 0.85),
+    "Java OOP":       Math.min(1, 0.15 + quiz.coding * 0.85),
+    "SQL":            Math.min(1, 0.1 + quiz.creativity * 0.9),
+    "Documentation/Planning": Math.min(1, 0.2 + quiz.agile * 0.8),
+    "Soft Skills":    Math.min(1, 0.25 + quiz.agile * 0.75),
+  };
+}
 
 const CX = 260, CY = 260, R = 162, LEVELS = 5;
 
@@ -201,5 +228,36 @@ function drawRadar(data) {
   });
 }
 
-drawRadar(SKILLS_DATA);
+// Initial render: try quiz-derived data first
+function refreshRadar(){
+  const quiz = loadQuizNormalized();
+  const data = quiz ? buildSkillsFromQuiz(quiz) : DEFAULT_SKILLS;
+  drawRadar(data);
+}
+
+refreshRadar();
+
+// ---------------- Quiz wiring ----------------
+function computeQuizAndSave(){
+  const form = document.getElementById('skillsQuiz');
+  const fv = new FormData(form);
+  // sum the pairs and normalize to 0..1 (max per skill = 10)
+  const coding = (parseInt(fv.get('c1')||0,10) + parseInt(fv.get('c2')||0,10)) / 10;
+  const agile = (parseInt(fv.get('a1')||0,10) + parseInt(fv.get('a2')||0,10)) / 10;
+  const creativity = (parseInt(fv.get('r1')||0,10) + parseInt(fv.get('r2')||0,10)) / 10;
+  const payload = { coding, agile, creativity, savedAt: new Date().toISOString() };
+  try{ localStorage.setItem('personal_skills_quiz', JSON.stringify(payload));
+    document.getElementById('quizResultMsg').textContent = 'Saved — radar updated.';
+  }catch(e){ document.getElementById('quizResultMsg').textContent = 'Could not save result.'; }
+  refreshRadar();
+}
+
+function clearQuiz(){ localStorage.removeItem('personal_skills_quiz'); document.getElementById('quizResultMsg').textContent='Cleared.'; refreshRadar(); }
+
+document.getElementById('submitQuiz').addEventListener('click', computeQuizAndSave);
+document.getElementById('clearQuiz').addEventListener('click', clearQuiz);
 </script>
+
+<div style="margin-top:24px;padding:12px;border:1px dashed #5b9eb5;border-radius:8px;background:#f3fdff">
+  <strong>Planner:</strong> Open the quick planner to manage personal events — <a href="{{ site.baseurl }}/calendar.html">Calendar Planner</a>
+</div>

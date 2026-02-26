@@ -3,10 +3,9 @@ layout: page
 permalink: /calendar
 ---
 
-<script src="https://cdn.tailwindcss.com"></script>
-
-<div class="bg-slate-900 text-slate-100 p-6">
+<div class="space-y-6 py-8">
   <div class="max-w-4xl mx-auto">
+    <div class="bg-slate-900 text-slate-100 p-6 rounded">
     <div class="flex items-center justify-between mb-4">
       <h1 class="text-2xl font-semibold">Planner Calendar</h1>
       <div>
@@ -33,6 +32,7 @@ permalink: /calendar
     </div>
 
     <div id="note" class="mt-4 text-sm text-slate-300">Click any date to add an event. Events are stored in your browser localStorage only.</div>
+    </div>
   </div>
 </div>
 
@@ -49,6 +49,9 @@ permalink: /calendar
     <form id="eventForm" class="space-y-3">
       <input id="eventTitle" placeholder="Event title" class="w-full border border-slate-600 bg-slate-700 text-slate-100 rounded px-2 py-1 placeholder-slate-400" required />
       <input id="eventTime" type="time" class="w-full border border-slate-600 bg-slate-700 text-slate-100 rounded px-2 py-1" />
+      <input id="eventPrereq" placeholder="Prerequisite knowledge (e.g. SQL, Spring)" class="w-full border border-slate-600 bg-slate-700 text-slate-100 rounded px-2 py-1" />
+      <input id="eventTopics" placeholder="Topics (comma-separated, e.g. docker,ci)" class="w-full border border-slate-600 bg-slate-700 text-slate-100 rounded px-2 py-1" />
+      <input id="eventPrize" type="number" min="0" placeholder="Prize pool (USD)" class="w-full border border-slate-600 bg-slate-700 text-slate-100 rounded px-2 py-1" />
       <textarea id="eventDesc" placeholder="Notes (optional)" class="w-full border border-slate-600 bg-slate-700 text-slate-100 rounded px-2 py-1" rows="3"></textarea>
       <div class="flex justify-end gap-2">
         <button type="button" id="addEventBtn" class="px-3 py-1 bg-slate-700 text-white rounded">Add Event</button>
@@ -80,6 +83,9 @@ permalink: /calendar
   const eventForm = document.getElementById('eventForm');
   const eventTitle = document.getElementById('eventTitle');
   const eventTime = document.getElementById('eventTime');
+  const eventPrereq = document.getElementById('eventPrereq');
+  const eventTopics = document.getElementById('eventTopics');
+  const eventPrize = document.getElementById('eventPrize');
   const eventDesc = document.getElementById('eventDesc');
   const addEventBtn = document.getElementById('addEventBtn');
 
@@ -159,7 +165,15 @@ permalink: /calendar
     if(list.length===0){ eventsList.innerHTML = '<div class="text-sm text-slate-400">No events for this date yet.</div>'; return; }
     list.forEach((ev, idx)=>{
       const row = document.createElement('div'); row.className='flex items-start justify-between gap-2 p-2 border border-slate-700 rounded bg-slate-900';
-      const left = document.createElement('div'); left.innerHTML = `<div class="font-medium text-slate-100">${ev.title}</div><div class="text-xs text-slate-400">${ev.time||''}</div><div class="text-xs text-slate-300">${ev.desc||''}</div>`;
+      const left = document.createElement('div');
+      left.innerHTML = `<div class="font-medium text-slate-100">${ev.title}</div>`;
+      const meta = document.createElement('div'); meta.className='text-xs text-slate-400';
+      if(ev.time) meta.innerHTML += `${ev.time} `;
+      if(ev.prereq) meta.innerHTML += `• Prereq: <strong class="text-slate-200">${ev.prereq}</strong> `;
+      if(ev.topics && ev.topics.length) meta.innerHTML += `• Topics: ${ev.topics.map(t=>`<span class="inline-block bg-slate-700 text-slate-200 px-2 py-0.5 rounded mr-1 text-xs">${t}</span>`).join(' ')}`;
+      if(ev.prize && ev.prize>0) meta.innerHTML += ` • 🏆 $${ev.prize}`;
+      const desc = document.createElement('div'); desc.className='text-xs text-slate-300 mt-1'; desc.textContent = ev.desc || '';
+      left.appendChild(meta); left.appendChild(desc);
       const right = document.createElement('div');
       const del = document.createElement('button'); del.className='text-sm text-red-400'; del.textContent='Delete';
       del.addEventListener('click', ()=>{ deleteEvent(date, idx); });
@@ -169,13 +183,16 @@ permalink: /calendar
     });
   }
 
-  function clearForm(){ eventTitle.value=''; eventTime.value=''; eventDesc.value=''; }
+  function clearForm(){ eventTitle.value=''; eventTime.value=''; eventDesc.value=''; eventPrereq.value=''; eventTopics.value=''; eventPrize.value=''; }
 
   function addEvent(){
     const date = modal.dataset.date;
     const title = eventTitle.value.trim();
     if(!title){ alert('Please enter a title for the event.'); return; }
-    const ev = { id: Date.now(), title, time: eventTime.value || '', desc: eventDesc.value || '' };
+  const topicsRaw = eventTopics.value || '';
+  const topics = topicsRaw.split(',').map(s=>s.trim()).filter(Boolean);
+  const prize = parseFloat(eventPrize.value) || 0;
+  const ev = { id: Date.now(), title, time: eventTime.value || '', desc: eventDesc.value || '', prereq: (eventPrereq.value||''), topics, prize };
     events[date] = events[date] || [];
     events[date].push(ev);
     saveEvents(events);

@@ -118,8 +118,6 @@ Or simply run the Makefile convenience command:
 make setup
 ```
 
-If `vendor/bundle` is already present (committed), Bundler may reuse it.
-
 3. (Optional) Python venv
 
 If you want the repository's Python venv for any additional scripts:
@@ -174,7 +172,6 @@ Then open http://localhost:4000.
 - Add a `.ruby-version` with the targeted Ruby version (e.g., `3.3.0`) for rbenv/asdf.
 - Consider adding a lightweight GitHub Actions workflow to build and optionally run `htmlproofer`.
 - Add `Gemfile.lock` to repo if you want reproducible gem versions; remove it from the `_config.yml` exclude list first if needed.
-- Add a small `Makefile` target `check` that runs link checks.
 
 ### Sample GitHub Actions (suggested)
 
@@ -198,38 +195,4 @@ jobs:
         with:
           ruby-version: '3.3'
           cache-bundler: true
-      - name: Install dependencies
-        run: |
-          gem install bundler -v 2.6.9
-          bundle _2.6.9_ install --jobs 4 --retry 3
-      - name: Build
-        run: bundle exec jekyll build --verbose
-      - name: Optional: HTML proof
-        run: |
-          gem install html-proofer
-          htmlproofer ./_site --check-html --empty_alt_ignore
 ```
-
-## Small contract (inputs / outputs / error modes)
-
-- Inputs: repository files and developer environment (Ruby, Bundler). `Gemfile` defines gems.
-- Outputs: generated site in `_site/`, dev server at localhost:4000.
-- Error modes: missing Ruby/Bundler, permission errors installing gems, bundler version mismatches, missing `Gemfile.lock` causing unexpected gem versions.
-
-## Edge cases
-
-- `vendor/bundle` is checked in: that can speed up local builds but can also cause platform mismatches if contributors use different OS/architecture.
-- `requirements.txt` is empty: Python venv is optional; nothing to install for site itself.
-
-## Assumptions made
-
-- The project is a standard Jekyll site; no additional build step (webpack/rollup) is currently present.
-- Ruby version inferred from vendor artifacts (3.3.0). If you use another Ruby, adjust accordingly.
-
----
-
-If you'd like, I can also:
-
-- Add the `.github/workflows/jekyll.yml` file in the repo.
-- Add `.ruby-version` and a `Gemfile.lock` (by running `bundle lock`) and commit them.
-- Tighten `scripts/init.sh` to use rbenv/asdf instead of sudo and make it idempotent.

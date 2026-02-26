@@ -9,6 +9,44 @@
     </title>
 
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+    <script>
+      function handleAuth() {
+
+        if (localStorage.getItem('logged_in') === 'true') {
+          return;
+        }
+
+        const params = new URLSearchParams(window.location.search);
+        const code = params.get('code');
+
+        console.log('Authorization code from URL:', code);
+        if (code) {
+          fetch('http://localhost:8080/api/auth/exchange', {
+            method: 'POST',
+            body: new URLSearchParams({ code: code })
+          })
+          .then(res => res.json())
+          .then(data => {
+            if (data.success) {
+              document.cookie = `jwtToken=${data.token}; path=/; secure; samesite=strict`;
+              localStorage.setItem('logged_in', true);
+              window.history.replaceState({}, document.title, window.location.pathname);
+              window.location.href = '{{site.baseurl}}/';
+            }
+          })
+          .catch(err => console.error('Auth error:', err));
+        }
+      }
+
+      // Run immediately if DOM is ready, otherwise wait for the event
+      if (document.readyState === 'loading') {
+        window.addEventListener('DOMContentLoaded', handleAuth);
+      } else {
+        handleAuth();
+      }
+    </script>
+
   </head>
 
   <body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col">
